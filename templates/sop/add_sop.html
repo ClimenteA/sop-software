@@ -1,0 +1,9 @@
+{% extends "sop/base.html" %}
+{% import "sop/sop_edit_macro.html" as sopMacro %}
+
+
+{% block main %}
+
+{{ sopMacro.render(logged, is_writer, True, sop, all_topics) }}
+
+{% endblock main %}

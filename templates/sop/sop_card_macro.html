@@ -1,0 +1,28 @@
+{% macro render(sop) -%}
+
+<article class="card has-background-light">
+    <div class="card-content">
+        <h1 class="title">
+            <a href="/sop/view-sop/{{ sop.sop_id }}">
+                {{ sop.title }}
+            </a>
+            {% if sop.writer_names %}
+            <p class="help has-text-grey">
+                by {{ sop.writer_names|join(", ") }}
+            </p>
+            {% endif %}
+        </h1>
+        <h2 class="subtitle mt-2">
+            {{ sop.purpose }}
+        </h2>
+        <p class="tags">
+            <span class="tag has-text-weight-bold">{{ sop.company }}</span>
+            {% for topic in sop.topics %}
+            <span class="tag is-dark">{{ topic }}</span>
+            {% endfor %}
+        </p>
+    </div>
+</article>
+
+
+{%- endmacro %}

@@ -1,0 +1,23 @@
+sop.softgata.com {
+	
+	tls your-email-here@gmail.com
+
+	reverse_proxy app:3000
+	redir /sitemap.xml /public/sop/sitemap.xml
+	redir /robots.txt /public/sop/robots.txt
+	redir / /sop/sops
+
+	encode zstd gzip
+	templates
+	file_server browse
+
+}
+
+
+admin.softgata.com {
+	
+	tls your-email-here@gmail.com
+
+	reverse_proxy /mongo-express* mongo-express:8081
+	redir / /mongo-express
+}

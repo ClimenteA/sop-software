@@ -1,0 +1,55 @@
+{% extends "sop/base.html" %}
+
+{% block main %}
+
+
+<form x-data="update_account_data" @submit.prevent="update" id="register"
+    class="small-form box p-6 is-flex is-flex-direction-column is-justify-content-center has-background-light mt-6">
+
+    <h1 class="title is-4 has-text-grey mb-6">Account details</h1>
+
+    <div class="field">
+        <label class="label">Name</label>
+        <div class="control">
+            <input name="name" value="{{user.name}}" class="input is-large is-responsive" type="text"
+                placeholder="John Doe" disabled>
+        </div>
+    </div>
+
+    <div class="field">
+        <label class="label">Company</label>
+        <div class="control">
+            <input name="company" value="{{user.company}}" class="input is-large is-responsive" type="text"
+                placeholder="johndoe llc" disabled>
+        </div>
+    </div>
+
+    <div class="file mt-4">
+        <label class="file-label">
+            <input class="file-input" type="file" name="avatar" x-on:change="files = Object.values($event.target.files)"
+            accept="image/*" required>
+            <span class="file-cta">
+                <span class="file-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="svg" fill="currentColor" viewBox="0 0 16 16">
+                        <path
+                            d="M4 0h8a2 2 0 0 1 2 2v8.293l-2.73-2.73a1 1 0 0 0-1.52.127l-1.889 2.644-1.769-1.062a1 1 0 0 0-1.222.15L2 12.292V2a2 2 0 0 1 2-2zm4.002 5.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0z" />
+                        <path
+                            d="M10.564 8.27 14 11.708V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-.293l3.578-3.577 2.56 1.536 2.426-3.395z" />
+                    </svg>
+                </span>
+                <span class="file-label" x-text="files ? files.map(file => file.name).join(', ') : 'Upload Avatar'">
+                </span>
+            </span>
+        </label>
+
+    </div>
+
+    <button type="submit" x-bind:class="loading ? 'is-loading' : ''"
+        class="button is-large is-responsive is-link mt-6">Update account</button>
+
+    <a class="mt-4 is-align-self-flex-end" href="/sop/contact">I want a different update</a>
+
+</form>
+
+
+{% endblock main %}

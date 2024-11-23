@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="SOP - Standard operating procedure software. Share knowledge better in your team. Scale your team with knowledge.">
+    <meta name="keywords" content="sop, knowledge base software, standard operating procedure">
+    <link rel='icon' type='image/png' href='/public/sfg/assets/favicon.ico'>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/public/bulma.min.css">
+    <link rel="stylesheet" href="/public/common.css">
+    {% block head %}
+    {% endblock head %}
+    <script defer src="/public/sop.js"></script>
+    <script defer src="/public/alpine.min.js"></script>
+    <title>SOP</title>
+</head>
+
+<body>
+
+    <nav x-data="{showBurgerMenu: false}" class="navbar has-background-light" role="navigation"
+        aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item is-size-5 has-text-weight-bold ml-3" href="/sop/procedures">
+                <svg class="mr-2" fill="black" height="24" width="24" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M0,439.5h170.7V268.8H0V439.5z M42.7,311.5H128v85.3H42.7V311.5z M213.3,418.2H512v-42.7H213.3V418.2z M0,226.2h170.7V55.5 H0V226.2z M42.7,98.2H128v85.3H42.7V98.2z M213.3,76.8v42.7H512V76.8H213.3z M213.3,332.8H512v-42.7H213.3V332.8z M213.3,204.8H512 v-42.7H213.3V204.8z"></path> </g></svg>
+                SOP
+            </a>
+
+            <a role="button" x-on:click="showBurgerMenu = !showBurgerMenu"
+                x-bind:class="showBurgerMenu ? 'is-active': ''" class="navbar-burger" aria-label="menu"
+                aria-expanded="false" data-target="navbar">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+        <div id="navbar" x-bind:class="showBurgerMenu ? 'is-active': ''" class="navbar-menu">
+
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons is-justify-content-end">
+                        <a href="/sop/add-sop" class="button is-primary">
+                            <strong>ADD SOP</strong>
+                        </a>
+                        {% if logged %}
+                        <a class="button is-link is-light" href="/sop/my-account">
+                            My account
+                        </a>
+                        {% else %}
+                        <a href="/sop/login" class="button is-link is-light">
+                            Login
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container min-100vh px-2">
+        {% block main %}
+
+        {% endblock main %}
+    </main>
+
+    <footer class="footer mt-12 is-flex is-justify-content-space-around" style="gap:2rem;">
+        <div class="is-flex is-flex-direction-column">
+            <h4 class="has-text-weight-bold">Legal</h4>
+            <a href="/sop/cookies">Cookies policy</a>
+            <a href="/sop/gdpr">GDPR</a>
+            <a href="/sop/toc">Terms and Conditions</a>
+        </div>
+        <div class="is-flex is-flex-direction-column">
+            <h4 class="has-text-weight-bold">Links</h4>
+            <a href="/sop/increase-productivity-with-standard-operating-procedure-sop-software">
+                How our software can help your company?
+            </a>
+            <a href="/sop/about">About us</a>
+            <a href="/sop/contact">Contact Us</a>
+        </div>
+    </footer>
+</body>
+
+</html>

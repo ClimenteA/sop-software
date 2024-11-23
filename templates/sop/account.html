@@ -1,0 +1,324 @@
+{% extends "sop/base.html" %}
+
+{% block main %}
+
+<section class="section">
+
+    <div style="max-width: 600px;"
+        class="box is-flex is-flex-direction-column is-align-items-center m-auto has-background-light">
+
+        <figure class="image is-128x128 overflow-hidden m-auto">
+            {% if user.avatar %}
+            <img loading="lazy" src="{{user.avatar}}">
+            {% else %}
+            <img loading="lazy" src="/public/avatar.svg">
+            {% endif %}
+        </figure>
+
+        <hgroup class="block mt-4 is-flex is-flex-direction-column is-align-items-center">
+            <h1 class="title is-4">{{user.name}}</h1>
+        </hgroup>
+
+        <p class="tags">
+            <span class="tag is-dark">Email: {{ user.email }}</span>
+            <span class="tag is-dark">Company: {{ user.company }}</span>
+            <span class="tag is-dark">Role: {{ user.role }}</span>
+        </p>
+
+        <div class="buttons" x-data="{confirmDelete: false}">
+            <a x-cloak x-show="!confirmDelete" class="button is-link is-light" href="/sop/logout">Logout</a>
+            <a x-cloak x-show="!confirmDelete" class="button is-success is-light" href="/sop/update-account">Update</a>
+
+            <a x-cloak x-show="!confirmDelete" x-on:click.prevent="confirmDelete = true;"
+                class="button is-danger is-light" href="/sop/delete-account">Delete</a>
+
+            <a x-cloak x-show="confirmDelete" href="/sop/delete-account" class="button is-danger is-light">
+                Yes, delete account
+            </a>
+
+            <a x-cloak x-show="confirmDelete" x-on:click.prevent="confirmDelete = false;"
+                class="button is-success is-light">No, cancel</a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+{% if user.role != "reader" %}
+
+<section id="tabs" x-data="{
+    activeTab: '{{activeTab}}',
+}" class="pt-6">
+
+    <div class="tabs is-boxed">
+        <ul>
+
+            <li x-on:click="activeTab = 'stats'" x-bind:class="activeTab == 'stats' ? 'is-active': ''">
+                <a href="#tabs">
+                    <span>Stats</span>
+                </a>
+            </li>
+            <li x-on:click="activeTab = 'mysops'" x-bind:class="activeTab == 'mysops' ? 'is-active': ''">
+                <a href="#tabs">
+                    <span>My SOP's</span>
+                </a>
+            </li>
+            <li x-on:click="activeTab = 'searches'" x-bind:class="activeTab == 'searches' ? 'is-active': ''">
+                <a href="#tabs">
+                    <span>Search Archive</span>
+                </a>
+            </li>
+
+            {% if user.role == "admin" %}
+
+            <li x-on:click="activeTab = 'users'" x-bind:class="activeTab == 'users' ? 'is-active': ''">
+                <a href="#tabs">
+                    <span>Users</span>
+                </a>
+            </li>
+
+            {% endif %}
+        </ul>
+    </div>
+
+    <div id="stats" x-bind:class="activeTab == 'stats' ? '': 'is-hidden'">
+        <p class="has-text-grey mb-6">
+            Here is a quick overview that can provide you with actionable insights on how to optimize the usage of SOPs.
+        </p>
+
+        <div class="level">
+            <div class="level-item has-text-centered">
+                <div>
+                    <p class="heading">Total Views</p>
+                    <p class="title">{{count_stats.total_views}}</p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered">
+                <div>
+                    <p class="heading">Total SOPs</p>
+                    <p class="title">{{count_stats.total_sops}}</p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered">
+                <div>
+                    <p class="heading">Total Readers</p>
+                    <p class="title">{{count_stats.total_readers}}</p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered">
+                <div>
+                    <p class="heading">Total writers</p>
+                    <p class="title">{{count_stats.total_writers}}</p>
+                </div>
+            </div>
+        </div>
+
+        {% if search_cloud %}
+        <p class="has-text-grey mt-6">Word Cloud from searches with no results:</p>
+        <div class="is-flex is-justify-content-center is-unselectable">
+            {{search_cloud | safe}}
+        </div>
+        {% endif %}
+
+
+        {% if sops_to_improve %}
+
+        <p class="has-text-grey mt-6">SOPs which need to be updated based on user rating:</p>
+
+        <table class="table is-fullwidth mt-6">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Writers</th>
+                    <th>Views</th>
+                    <th>Topics</th>
+                    <th>Rating</th>
+                    <th>Last Viewed On</th>
+                    <th>Last Updated On</th>
+                    <th>Created On</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in sops_to_improve %}
+                <tr>
+                    <td class="pt-3">
+                        <a href="/sop/view-sop/{{s.sop_id}}">
+                            <strong>{{ s.title }}</strong>
+                        </a>
+                    </td>
+                    <td class="pt-3">{{ s.writers | join(', ') }}</td>
+                    <td class="pt-3">{{ s.views }}</td>
+                    <td class="pt-3">{{ s.topics | join(', ') }}</td>
+                    <td class="pt-3">{{ s.rating }}</td>
+                    <td class="pt-3">{{ s.last_viewed_on[:10] if s.last_viewed_on else "" }}</td>
+                    <td class="pt-3">{{ s.last_update_on[:10] }}</td>
+                    <td class="pt-3">{{ s.created_on[:10] }}</td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+        {% else %}
+
+        {% if sops %}
+        <p class="has-text-grey mt-6">There were no bad rated SOPs for now.</p>
+        {% endif %}
+
+        {% endif %}
+
+
+    </div>
+
+    <div id="mysops" x-bind:class="activeTab == 'mysops' ? '': 'is-hidden'">
+
+        <div class="is-flex mb-6">
+            <p class="has-text-grey">
+                Here, you can see all the SOPs you've been contributing to.
+                You can click on the title to see or update the SOP.
+            </p>
+        </div>
+
+        {% if sops %}
+
+        <table class="table is-fullwidth">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Writers</th>
+                    <th>Views</th>
+                    <th>Topics</th>
+                    <th>Rating</th>
+                    <th>Last Viewed On</th>
+                    <th>Last Updated On</th>
+                    <th>Created On</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for s in sops %}
+                <tr>
+                    <td class="pt-3">
+                        <a href="/sop/view-sop/{{s.sop_id}}">
+                            <strong>{{ s.title }}</strong>
+                        </a>
+                    </td>
+                    <td class="pt-3">{{ s.writers | join(', ') }}</td>
+                    <td class="pt-3">{{ s.views }}</td>
+                    <td class="pt-3">{{ s.topics | join(', ') }}</td>
+                    <td class="pt-3">{{ s.rating }}</td>
+                    <td class="pt-3">{{ s.last_viewed_on[:10] if s.last_viewed_on else "" }}</td>
+                    <td class="pt-3">{{ s.last_update_on[:10] }}</td>
+                    <td class="pt-3">{{ s.created_on[:10] }}</td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+        {% else %}
+
+        <p>You didn't wrote any SOPs yet...</p>
+
+        {% endif %}
+
+    </div>
+
+    <div id="searches" x-bind:class="activeTab == 'searches' ? '': 'is-hidden'">
+        <p class="has-text-grey">
+            Here, you will see the latest searches that didn't return any results for user searches.
+            This can help you create new SOPs or optimize existing ones.
+        </p>
+
+        {% if search_cloud %}
+        <div class="is-flex is-justify-content-center is-unselectable">
+            {{search_cloud | safe}}
+        </div>
+        {% endif %}
+
+        {% if searches %}
+        <div class="tags are-medium mt-4">
+            {% for s in searches %}
+            <span class="tag">{{s.search}}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </div>
+
+
+    {% if user.role == "admin" %}
+
+    <div id="users" x-bind:class="activeTab == 'users' ? '': 'is-hidden'">
+
+        <div class="is-flex is-flex-direction-column mb-6">
+
+            <p class="has-text-grey">
+                Here you can see all the users added.
+                You can delete them by clicking the "Delete" button.
+                You can add new users by clicking the "Add a new user" button.
+                If you want to upgrade an account delete it and add it again with the new role.
+                <br>
+                You can use CTRL + F to search for a specific user.
+            </p>
+
+            <div class="is-align-self-flex-end">
+                <a href="/sop/add-new-user" class="button is-primary has-text-weight-bold is-small mt-4">
+                    Add a new user
+                </a>
+            </div>
+
+        </div>
+
+        <table class="table is-fullwidth">
+            <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>User Email</th>
+                    <th>User Role</th>
+                    <th>Created On</th>
+                    <th>Delete User</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for u in users %}
+                <tr>
+                    <td class="pt-3">{{ u.name }}</td>
+                    <td class="pt-3">{{ u.email }}</td>
+                    <td class="pt-3">{{ u.role | capitalize }}</td>
+                    <td class="pt-3">{{ u.created_on[:10] }}</td>
+                    <td>
+                        <div class="buttons" x-data="{confirmDelete: false}">
+                            <a x-cloak x-show="!confirmDelete" x-on:click.prevent="confirmDelete = true;"
+                                class="button is-small is-danger is-light">Delete</a>
+
+                            <a x-cloak x-show="confirmDelete" href="/sop/delete-account/{{u.user_id}}"
+                                class="button is-small is-danger is-light">
+                                Yes, delete account
+                            </a>
+
+                            <a x-cloak x-show="confirmDelete" x-on:click.prevent="confirmDelete = false;"
+                                class="button is-small is-success is-light">No, cancel</a>
+
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+    </div>
+
+    {% endif %}
+
+
+</section>
+
+{% endif %}
+
+
+{% endblock main %}

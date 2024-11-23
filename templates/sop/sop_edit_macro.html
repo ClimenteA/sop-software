@@ -1,0 +1,200 @@
+{% macro render(logged, is_writer, allowEdit, sop, all_topics) -%}
+
+{% block head %}
+<link href="/public/cdn.quilljs.com_1.3.6_quill.snow.css" rel="stylesheet">
+
+<style>
+    .ql-container {
+        font-size: 16px;
+    }
+
+    .no-resize-scrollbar {
+        resize: none;
+        overflow: hidden;
+        padding: 5px;
+    }
+
+    .ql-toolbar.ql-snow {
+        position: sticky;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        background-color: #fff;
+        border-bottom: 1px solid #ccc;
+        box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+{% endblock head %}
+
+<div x-data="create_quill_sop_data({% if sop %}'{{ sop.sop_id }}'{% endif %})" x-init="preFillFields">
+
+    <section class="content section">
+
+        <h6 class="has-text-grey">Title</h6>
+        <input x-model="sopTitle" class="input is-large has-text-weight-bold mb-5" type="text"
+            placeholder="Add a short and concise title">
+
+        <h6 class="has-text-grey">Purpose</h6>
+
+        <textarea x-model="sopPurpose"
+            x-on:focus="$nextTick(() => { $event.target.style.cssText = 'height:auto;'; $event.target.style.cssText = 'height:' + ($event.target.scrollHeight) + 'px;'; });"
+            x-on:input="$nextTick(() => { $event.target.style.cssText = 'height:auto;'; $event.target.style.cssText = 'height:' + ($event.target.scrollHeight) + 'px;'; });"
+            class="textarea no-resize-scrollbar mb-5" rows="3"
+            placeholder="Purpose of this SOP. What it aims to clarify."></textarea>
+
+
+        <h6 class="has-text-grey">Application</h6>
+
+        <textarea x-model="sopApplication"
+            x-on:focus="$nextTick(() => { $event.target.style.cssText = 'height:auto;'; $event.target.style.cssText = 'height:' + ($event.target.scrollHeight) + 'px;'; });"
+            x-on:input="$nextTick(() => { $event.target.style.cssText = 'height:auto;'; $event.target.style.cssText = 'height:' + ($event.target.scrollHeight) + 'px;'; });"
+            class="textarea no-resize-scrollbar mb-5" rows="3" placeholder="To whom this SOP is addressed"></textarea>
+
+        <div>
+
+            <label class="label has-text-grey">
+                Topic(s)
+                <input x-on:change="addTopic" x-on:keyup.enter="addTopic" x-model="topic" class="input" type="text"
+                    placeholder="IT, Finance, etc" list="topics-list">
+            </label>
+
+            <datalist id="topics-list">
+                {% for topic in all_topics %}
+                <option value="{{ topic }}">
+                    {% endfor %}
+
+                <option value="Operations">
+                <option value="Customer Service">
+                <option value="Finance">
+                <option value="Legal">
+                <option value="Marketing">
+                <option value="Management">
+                <option value="Sales">
+                <option value="IT">
+                <option value="HR">
+                <option value="R&D">
+                <option value="Public Relations">
+
+            </datalist>
+
+            <p class="help has-text-grey">Press enter to add topic</p>
+
+            <div class="tags are-small mt-4">
+                <template x-for="topic in topics">
+                    <span class="tag is-info">
+                        <span x-text="topic" class="has-text-weight-bold has-text-white">
+                        </span>
+                        <button x-on:click="topics = topics.filter((el) => el != topic);" class="delete ml-1"></button>
+                    </span>
+                </template>
+            </div>
+
+            <p x-cloak x-show="topicsNotSelected" class="help has-text-danger">
+                Please add at least one topic
+            </p>
+
+        </div>
+
+        <h6 class="has-text-grey mt-6">Procedure steps</h6>
+        <div id="text-editor"></div>
+
+
+        <div class="mt-6 is-pulled-right" x-data="{confirmDelete: false}">
+
+            <div class="buttons mb-1">
+
+                <button x-cloak x-show="!confirmDelete" id="save" title="Save & View" x-on:click="createOrUpdateSOP"
+                    x-bind:class="loading ? 'is-loading': ''" class="button is-success is-light">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="svg" viewBox="0 0 16 16">
+                        <path
+                            d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z" />
+                    </svg>
+                    <span class="ml-2">Save & View</span>
+                </button>
+
+                <button x-cloak x-show="!confirmDelete" id="public" x-bind:title="public ? 'Public SOP': 'Private SOP'"
+                    x-on:click="public = !public;" x-bind:class="loading ? 'is-loading': ''"
+                    class="button is-link is-light">
+
+                    <div x-bind:class="public ? '': 'is-hidden'" class="is-flex is-align-items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="svg" viewBox="0 0 16 16">
+                            <path
+                                d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855-.143.268-.276.56-.395.872.705.157 1.472.257 2.282.287V1.077zM4.249 3.539c.142-.384.304-.744.481-1.078a6.7 6.7 0 0 1 .597-.933A7.01 7.01 0 0 0 3.051 3.05c.362.184.763.349 1.198.49zM3.509 7.5c.036-1.07.188-2.087.436-3.008a9.124 9.124 0 0 1-1.565-.667A6.964 6.964 0 0 0 1.018 7.5h2.49zm1.4-2.741a12.344 12.344 0 0 0-.4 2.741H7.5V5.091c-.91-.03-1.783-.145-2.591-.332zM8.5 5.09V7.5h2.99a12.342 12.342 0 0 0-.399-2.741c-.808.187-1.681.301-2.591.332zM4.51 8.5c.035.987.176 1.914.399 2.741A13.612 13.612 0 0 1 7.5 10.91V8.5H4.51zm3.99 0v2.409c.91.03 1.783.145 2.591.332.223-.827.364-1.754.4-2.741H8.5zm-3.282 3.696c.12.312.252.604.395.872.552 1.035 1.218 1.65 1.887 1.855V11.91c-.81.03-1.577.13-2.282.287zm.11 2.276a6.696 6.696 0 0 1-.598-.933 8.853 8.853 0 0 1-.481-1.079 8.38 8.38 0 0 0-1.198.49 7.01 7.01 0 0 0 2.276 1.522zm-1.383-2.964A13.36 13.36 0 0 1 3.508 8.5h-2.49a6.963 6.963 0 0 0 1.362 3.675c.47-.258.995-.482 1.565-.667zm6.728 2.964a7.009 7.009 0 0 0 2.275-1.521 8.376 8.376 0 0 0-1.197-.49 8.853 8.853 0 0 1-.481 1.078 6.688 6.688 0 0 1-.597.933zM8.5 11.909v3.014c.67-.204 1.335-.82 1.887-1.855.143-.268.276-.56.395-.872A12.63 12.63 0 0 0 8.5 11.91zm3.555-.401c.57.185 1.095.409 1.565.667A6.963 6.963 0 0 0 14.982 8.5h-2.49a13.36 13.36 0 0 1-.437 3.008zM14.982 7.5a6.963 6.963 0 0 0-1.362-3.675c-.47.258-.995.482-1.565.667.248.92.4 1.938.437 3.008h2.49zM11.27 2.461c.177.334.339.694.482 1.078a8.368 8.368 0 0 0 1.196-.49 7.01 7.01 0 0 0-2.275-1.52c.218.283.418.597.597.932zm-.488 1.343a7.765 7.765 0 0 0-.395-.872C9.835 1.897 9.17 1.282 8.5 1.077V4.09c.81-.03 1.577-.13 2.282-.287z" />
+                        </svg>
+                        <span class="ml-2">Public</span>
+                    </div>
+
+                    <div x-bind:class="public ? 'is-hidden': ''" class="is-flex is-align-items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="svg" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                            <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z" />
+                        </svg>
+                        <span class="ml-2">Private</span>
+                    </div>
+
+                </button>
+
+                <a x-cloak x-show="!confirmDelete" class="button is-danger is-light"
+                    x-on:click.prevent="confirmDelete = true;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="svg" viewBox="0 0 16 16">
+                        <path
+                            d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z" />
+                    </svg>
+                    <span class="ml-2">Delete</span>
+                </a>
+
+                <a x-cloak x-show="confirmDelete" href="/sop/delete-sop/{{sop.sop_id}}"
+                    class="button is-danger is-light">Yes, delete it</a>
+
+                <a x-cloak x-show="confirmDelete" x-on:click.prevent="confirmDelete = false;"
+                    class="button is-success is-light">No, cancel</a>
+
+            </div>
+
+            <p x-cloak x-show="incompleteFields" class="help has-text-danger">Please complete all fields before
+                saving...</p>
+
+            <p x-cloak x-show="backendError" x-text="backendError" class="help has-text-danger"></p>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+
+<script src="/public/cdn.quilljs.com_1.3.6_quill.js"></script>
+
+<script>
+
+    const quill = new Quill('#text-editor', {
+        theme: 'snow',
+        readOnly: false,
+        placeholder: 'Start writing the SOP steps...',
+        modules: {
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                ['link', 'image'],
+                [{ 'align': [] }]
+            ],
+            clipboard: {
+                matchVisual: false
+            }
+        }
+    });
+
+    const Delta = Quill.import('delta');
+
+    quill.clipboard.addMatcher(Node.TEXT_NODE, function (node, delta) {
+        return delta.compose(new Delta().retain(delta.length(), { color: null }));
+    });
+
+</script>
+
+
+{%- endmacro %}

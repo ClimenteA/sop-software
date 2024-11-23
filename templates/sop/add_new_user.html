@@ -1,0 +1,87 @@
+{% extends "sop/base.html" %}
+
+{% block main %}
+
+<div x-data="add_new_user" class="mt-6">
+
+    <form class="small-form box p-6 is-flex is-flex-direction-column is-justify-content-center has-background-light"
+        @submit.prevent="addUser">
+
+        <h1 class="title is-4 has-text-grey">Add new user</h1>
+        <p>
+            Insert email of the user you want to add and you will receive an invite link.<br>
+            The invite link will be valid for 30 days or until is used.<br>
+            Send the invite link received via email/slack/teams/other.
+        </p>
+
+
+        <div class="field mt-6">
+            <label class="label">Email</label>
+            <div class="control">
+                <input x-model="email" class="input is-large is-responsive" type="email" placeholder="john@company.com"
+                    required>
+            </div>
+        </div>
+
+        <div class="control is-flex is-flex-direction-column mt-4">
+
+            <label class="radio ml-2 mb-4">
+                <input type="radio" value="Reader" x-model="role" x-bind:checked="role">
+                Regular User (Reader)
+                <p class="help has-text-grey">They can read public and private SOP's</p>
+            </label>
+
+            <label class="radio mb-4">
+                <input type="radio" value="SME" x-model="role">
+                Subject Matter Expert (SME)
+                <p class="help has-text-grey">They can read and write SOP's</p>
+            </label>
+
+            <label class="radio mb-4">
+                <input type="radio" value="Admin" x-model="role">
+                Admin
+                <p class="help has-text-grey">They can read/write SOP's and add new users</p>
+            </label>
+
+        </div>
+
+        <button type="submit" class="button is-link is-large is-responsive mt-6">
+            Get invite <strong class="mx-1" x-text="role"></strong> link
+        </button>
+        <p class="help has-text-grey is-pulled-right">Link will be automatically copied to clipboard</p>
+
+    </form>
+
+    <section class="section">
+        <ul>
+            <template x-for="invited in invitedList">
+                <li x-data="{linkCopied: false}"
+                    x-on:click="navigator.clipboard.writeText(invited.url); linkCopied = true; setTimeout(() => {linkCopied = false;}, 4000);"
+                    class="box has-background-light is-flex is-justify-content-space-between is-align-items-center is-unselectable is-clickable">
+
+                    <strong x-cloak x-show="linkCopied" class="py-3 has-text-success">
+                        Invite Link copied to clipboard! Send the link via email or message.
+                    </strong>
+
+                    <div x-cloak x-show="!linkCopied">
+                        <strong x-text="invited.role"></strong>
+                        <span x-text="': ' + invited.email"></span>
+                        <p class="help has-text-grey">Click to copy link</p>
+                    </div>
+
+                    <button x-on:click="invitedList = invitedList.filter(el => el.email != invited.email)"
+                        class="delete is-medium"></button>
+
+                </li>
+            </template>
+        </ul>
+    </section>
+
+</div>
+
+
+
+
+
+
+{% endblock main %}

@@ -1,0 +1,39 @@
+{% extends "sop/base.html" %}
+
+{% block main %}
+
+<div x-data="login_data" class="mt-6">
+
+    <form id="login"
+        class="small-form box p-6 is-flex is-flex-direction-column is-justify-content-center has-background-light"
+        @submit.prevent="login">
+
+        <h1 class="title is-4 has-text-grey mb-6">Login</h1>
+
+        <div class="field">
+            <label class="label">Email</label>
+            <div class="control">
+                <input x-model="email" name="email" class="input is-large" type="email" placeholder="john@company.com">
+            </div>
+            <p x-cloak x-show="invalidcreds" class="help is-danger">Incorect email or password</p>
+        </div>
+
+        <div class="field">
+            <label class="label">Password</label>
+            <div class="control">
+                <input x-model="password" name="password" class="input is-large" type="password" placeholder="******">
+            </div>
+            <p x-cloak x-show="invalidcreds" class="help is-danger">Incorect email or password</p>
+        </div>
+
+        <button type="submit" x-bind:class="loading ? 'is-loading' : ''" class="button is-link is-large mt-4">
+            Login
+        </button>
+
+        <a class="mt-4 is-align-self-flex-end" href="/sop/register">I don't have an account</a>
+    </form>
+
+</div>
+
+
+{% endblock main %}

@@ -1,0 +1,49 @@
+{% extends "sop/base.html" %}
+
+{% block main %}
+
+<div x-data="contact_us_data">
+
+    <form @submit.prevent="sendMessageToAdmin" class="small-form box has-background-light mt-6">
+
+        <h1 class="title is-4 has-text-grey mb-6">Send a message</h1>
+
+        <div class="field">
+            <label class="label">Email</label>
+            <div class="control">
+                <input x-model="email" name="email" maxlength="50" class="input is-large" type="email" required>
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label">Your Message:</label>
+            <div class="control">
+                <textarea x-model="message" name="message" class="textarea" maxlength="3000" required>
+                </textarea>
+            </div>
+            <p class="help has-text-grey">
+                Request: Demo / Quote / Meeting / Other
+            </p>
+        </div>
+
+        <div class="field is-grouped mt-6">
+            <div class="control">
+                <button type="submit" x-bind:class="loading ? 'is-loading' : ''" class="button is-link">Send</button>
+            </div>
+        </div>
+
+    </form>
+
+
+    <div x-cloak x-show="messageSent == false;" class="notification is-danger">
+        Message could not be sent. Please try again.
+    </div>
+
+    <div x-cloak x-show="messageSent == true;" class="notification is-success">
+        Message was sent!
+    </div>
+
+</div>
+
+
+{% endblock main %}

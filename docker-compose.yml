@@ -1,0 +1,77 @@
+version: "3"
+
+services:
+
+  app:
+    container_name: multisite-web
+    build: .
+    command: python main.py
+    restart: unless-stopped
+    volumes:
+      - "./:/home/sites:rw"
+      - "storage:/home/storage:rw"
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
+    networks:
+      - web
+      
+  mongo:
+    image: mongo:${MONGO_IMAGE_TAG}
+    hostname: ${MONGO_HOSTNAME}
+    container_name: multisite-mongo
+    restart: unless-stopped
+    ports:
+      - "${MONGO_PORT}:${MONGO_PORT}"
+    env_file:
+      - .env
+    volumes:
+      - "mongodata:/data/db"
+    networks:
+      - web
+
+  mongo-express:
+    image: mongo-express:${MONGO_EXPRESS_IMAGE_TAG}
+    hostname: mongo-express
+    container_name: multisite-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env
+    networks:
+      - web
+    depends_on:
+      - mongo
+
+  proxy:
+    container_name: multisite-proxy
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./public:/srv
+      - $PWD/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    env_file:
+      - .env
+    networks:
+      - web
+    depends_on:
+      - app
+
+
+networks:
+  web:
+    driver: bridge
+
+
+volumes:
+  storage:
+  mongodata:
+  caddy_data:
+  caddy_config:

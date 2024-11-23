@@ -1,0 +1,111 @@
+{% extends "sop/base.html" %}
+
+{% block main %}
+
+<div x-data="register_data(
+    {% if invite_token %}
+    '{{ invite_token }}',
+    '{{ company }}',
+    '{{ email }}'
+    {% endif %}
+)" class="mt-6">
+
+    <form id="register"
+        class="small-form box p-6 is-flex is-flex-direction-column is-justify-content-center has-background-light"
+        @submit.prevent="register">
+
+        {% if demo_account %}
+
+        <p class="has-text-danger mb-6">
+            This will be a DEMO account.
+            <br>
+            Data will be deleted at random times.
+            <br>
+            <a href="/sop/contact">
+                Contact us
+                <span class="has-text-dark">
+                    if you consider implementing this in your company.
+                </span>
+            </a>
+        </p>
+
+        {% endif %}
+
+        <h1 class="title is-4 has-text-grey mb-6">Register</h1>
+
+        <div class="field">
+            <label class="label">Name</label>
+            <div class="control">
+                <input x-model="name" name="name" class="input is-large is-responsive" type="text"
+                    placeholder="John Doe" required>
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label">Company</label>
+            <div class="control">
+                <input x-model="company" name="company" class="input is-large is-responsive" type="text"
+                    placeholder="johndoe llc" {% if invite_token %} disabled {% else %} required {% endif %}>
+            </div>
+        </div>
+
+        <div class="field mt-4">
+            <label class="label">Email</label>
+            <div class="control">
+                <input x-model="email" name="email" class="input is-large is-responsive" type="email"
+                    placeholder="john@company.com" {% if invite_token %} disabled {% else %} required {% endif %}>
+            </div>
+            <p x-cloak x-show="registeredemail" class="help is-danger">Email already registered</p>
+            <p x-cloak x-show="invalidemailorpass" class="help is-danger">
+                Invalid email or password
+            </p>
+        </div>
+
+        <div class="field">
+            <label class="label">Password</label>
+            <div class="control">
+                <input x-model="password" name="password" class="input is-large is-responsive" type="password"
+                    placeholder="******" required>
+            </div>
+            <p x-cloak x-show="invalidpass" class="help is-danger">Passwords are not the same</p>
+            <p x-cloak x-show="invalidemailorpass" class="help is-danger">
+                Invalid email or password
+            </p>
+        </div>
+
+        <div class="field">
+            <label class="label">Confirm password</label>
+            <div class="control">
+                <input x-model="confirmpassword" name="confirmpassword" class="input is-large is-responsive"
+                    type="password" placeholder="******" required>
+            </div>
+            <p x-cloak x-show="invalidpass" class="help is-danger">Passwords are not the same</p>
+            <p x-cloak x-show="invalidemailorpass" class="help is-danger">
+                Invalid email or password
+            </p>
+        </div>
+
+
+        <div class="field">
+            <div class="control">
+                <label class="checkbox">
+                    <input x-model="conditiiacceptate" name="conditiiacceptate" type="checkbox">
+                    I agree with the <a href="/sop/toc">terms and conditions</a>
+                </label>
+            </div>
+            <p x-cloak x-show="invalidconditii" class="help is-danger">Terms and conditions are not accepted</p>
+        </div>
+
+        <button type="submit" x-bind:class="loading ? 'is-loading' : ''" class="button is-link  mt-4">
+            Register
+        </button>
+
+        <a class="mt-4 is-align-self-flex-end" href="/sop/login">I already have an account</a>
+
+    </form>
+
+</div>
+
+
+
+{% endblock main %}

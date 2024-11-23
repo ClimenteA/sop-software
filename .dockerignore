@@ -1,0 +1,8 @@
+tests
+venv
+Makefile
+ReadMe.md
+*.ipynb
+.pytest_cache
+__pycache__
+.env.deploy
