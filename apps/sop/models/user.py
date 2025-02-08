@@ -1,7 +1,7 @@
 import uuid
 from enum import StrEnum
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from typing_extensions import Annotated
 from pydantic import BaseModel, Field, AfterValidator, model_validator
 from common.validators import get_encrypted_password, get_lower_email
@@ -32,8 +32,8 @@ class Role(StrEnum):
 class UserOnDbModel(UserOnAvatarModel, UserOnRegisterModel):
     user_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     role: Role = Role.READER
-    created_on: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
-    updated_on: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_on: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_on: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     tenant_id: Optional[str] = None
 
     @model_validator(mode="after")
@@ -57,11 +57,11 @@ class UserOnInviteModel(BaseModel):
 
 class UserOnInviteInDbModel(UserOnInviteModel):
     tenant_id: str
-    invited_on: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    invited_on: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     token: str = Field(default_factory=lambda: str(uuid.uuid4()))
 
 
 class MessageAdminModel(BaseModel):
     email: StrLowerEmail
     message: str
-    added_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    added_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())

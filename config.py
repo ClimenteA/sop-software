@@ -35,6 +35,7 @@ class Config(BaseSettings):
     PORT: int = 3000
     SECRET: str = DEVPASS
     DEMO_ACCOUNT: bool = False
+    IS_MULTITENANT: bool = False
 
     def get_mongo_uri(self):
         queryparams = "?authSource=admin&serverSelectionTimeoutMS=5000"

@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from config import cfg
+from datetime import datetime, timedelta, timezone
 from apps.sop.models.user import UserOnDbModel, UserOnRegisterModel, Role
 from common.responses import CustomResponse, State
 from common.logger import log
@@ -28,13 +29,22 @@ async def register_user(user: UserOnRegisterModel, invite_token: str = None):
                     status_code=400,
                 )
 
-            date = (datetime.utcnow() - timedelta(days=30)).isoformat()
+            date = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
             invited_user = await InvitedUsersCol.find_one(
                 {"token": invite_token, "invited_on": {"$gte": date}}
             )
             if invited_user:
                 role = invited_user["role"]
                 tenant_id = invited_user["tenant_id"]
+        else:
+            if not cfg.IS_MULTITENANT:
+                users_count = await UsersCol.count()
+                if users_count > 0:
+                    return CustomResponse(
+                        content="New registers are available only by invites",
+                        status=State.FAILED,
+                        status_code=400,
+                    )
 
         newuser = UserOnDbModel(**user.model_dump(), role=role, tenant_id=tenant_id)
         inserted = await UsersCol.insert_one(newuser.model_dump())

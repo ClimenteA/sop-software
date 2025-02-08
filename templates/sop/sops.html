@@ -4,13 +4,13 @@
 
 {% block main %}
 
-<form class="is-flex is-justify-content-center is-align-items-self-end my-6">
+<form class="is-flex is-justify-content-center is-align-items-self-end my-6" method="GET">
     <div>
         <label for="search" class="is-size-5 has-text-grey">
             Search for SOP's...
             <input id="search" name="search" class="input is-link is-medium" type="text"
                 placeholder="Title, department, other keywords..." {% if search %} value="{{search}}" {% endif %}
-                autofocus list="title-list">
+                autofocus autocomplete="off" list="title-list">
         </label>
 
         <datalist id="title-list">
@@ -18,6 +18,10 @@
             <option value="{{ title }}">
                 {% endfor %}
         </datalist>
+
+        {% if selected_topic %}
+        <input type="hidden" name="topic" value="{{ selected_topic }}">
+        {% endif %}
 
     </div>
     <button class="button is-link is-medium ml-2">

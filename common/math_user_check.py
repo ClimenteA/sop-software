@@ -1,7 +1,7 @@
 import uuid
 import base64
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from PIL import Image, ImageDraw
 from config import get_collection, CustomResponse, State
@@ -30,7 +30,7 @@ async def create_check(collection: str):
         "problem_id": imgId,
         "solution": solution,
         "imgbase64": imgbase64,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
     col = get_collection(collection)
@@ -44,7 +44,7 @@ async def create_check(collection: str):
     )
 
     # Clear checks older than 10 minutes
-    refdate = (datetime.utcnow() - timedelta(minutes=10)).isoformat()
+    refdate = (datetime.now(timezone.utc) - timedelta(minutes=10)).isoformat()
     await col.delete_many({"created_at": {"$lt": refdate}})
     checkInfo.pop("solution", None)
     return checkInfo

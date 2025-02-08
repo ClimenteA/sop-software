@@ -2,7 +2,7 @@ import apps.sop.models.collections as c
 from apps.sop.models.sop import SopOnDbModel, SopOnCreateModel
 from common.logger import log
 from common.responses import CustomResponse, State
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 async def create_sop(user: dict, sop: SopOnCreateModel):
@@ -11,7 +11,7 @@ async def create_sop(user: dict, sop: SopOnCreateModel):
             **sop.model_dump(),
             tenant_id=user["tenant_id"],
             writers=[user["user_id"]],
-            created_on=datetime.utcnow().isoformat(),
+            created_on=datetime.now(timezone.utc).isoformat(),
         )
 
         title_exists = await c.SopsCol.find_one({"sop_id": new_sop.sop_id})

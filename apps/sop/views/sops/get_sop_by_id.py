@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import apps.sop.models.collections as c
 from common.logger import log
 
@@ -21,7 +21,7 @@ async def get_sop_by_id(sop_id: str, user_id: str, count_view: bool = False):
                 await c.SopsCol.update_one(
                     filters=query,
                     data={
-                        "$set": {"last_viewed_on": datetime.utcnow().isoformat()},
+                        "$set": {"last_viewed_on": datetime.now(timezone.utc).isoformat()},
                         "$inc": {"views": 1},
                     },
                 )

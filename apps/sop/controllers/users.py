@@ -8,6 +8,7 @@ from apps.sop.models.user import (
     UserOnInviteModel,
     Role,
 )
+from apps.sop.models.collections import UsersCol
 from apps.sop.models.collections import SOPCol
 import apps.sop.views.users as views
 from common.responses import CustomResponse, State
@@ -64,6 +65,11 @@ async def get_register_template(
     if invite_token is not None:
         await views.logout_user(token)
         company, invited_email = await views.get_info_from_invite_token(invite_token)
+
+    if not cfg.IS_MULTITENANT and invite_token is None:
+        users_count = await UsersCol.count()
+        if users_count > 0:
+            return RedirectResponse("/sop/login")
 
     return await render_template(
         request,

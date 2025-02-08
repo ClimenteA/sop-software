@@ -1,7 +1,8 @@
 import pymongo
 import Levenshtein
+import pymongo.errors
 from common.logger import log
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import apps.sop.models.collections as c
 from apps.sop.text_utils import make_slug_from_text
 from apps.sop.models.sop import SopSearchOnDbModel
@@ -15,7 +16,7 @@ async def save_search(search: str, tenant_id: str):
         try:
             searches_nbr = await c.SopSearchesCol.count({"tenant_id": tenant_id})
             if searches_nbr > 500_000:
-                oldest_date = (datetime.utcnow() - timedelta(days=90)).isoformat()
+                oldest_date = (datetime.now(timezone.utc) - timedelta(days=90)).isoformat()
                 await c.SopSearchesCol.delete_many(
                     {"tenant_id": tenant_id, "searched_at": oldest_date}
                 )
@@ -85,7 +86,7 @@ async def get_sops(page: int, search: str, topic: str, tenant_id: str):
                     [
                         Levenshtein.distance(search, v)
                         for k, v in d.items()
-                        if k in ["title", "purpose", "application", "content"]
+                        if k in ["title", "purpose", "application"]
                     ]
                 )
 
@@ -96,7 +97,6 @@ async def get_sops(page: int, search: str, topic: str, tenant_id: str):
                     x.get("title", ""),
                     x.get("purpose", ""),
                     x.get("application", ""),
-                    x.get("content", ""),
                 ),
             )
 

@@ -1,7 +1,7 @@
 import re
 import os
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from common.save_image import save_image_sync
 from pydantic import BaseModel, Field, model_validator
 from apps.sop.text_utils import (
@@ -56,7 +56,7 @@ class SopOnDbModel(SopOnCreateModel):
     views: Optional[int] = 0
     last_viewed_on: Optional[str] = None
     rating: Optional[int] = 0
-    last_update_on: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    last_update_on: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     created_on: str = None
 
     @model_validator(mode="before")
@@ -74,7 +74,7 @@ class SopSearchOnDbModel(BaseModel):
     _id: Optional[str] = None
     search: str
     tenant_id: str
-    searched_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    searched_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     @model_validator(mode="before")
     @classmethod

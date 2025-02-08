@@ -1,6 +1,6 @@
 import os
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from .collections import get_collection
 
 SECRET = os.environ["SECRET"]
@@ -12,7 +12,7 @@ async def get_token_for_user_id(
     blacktoken_col: str,
     expire_days: int = 730,
 ):
-    expire = (datetime.utcnow() + timedelta(days=expire_days)).isoformat()
+    expire = (datetime.now(timezone.utc) + timedelta(days=expire_days)).isoformat()
     encoded_jwt = jwt.encode(
         {
             "user_id": user_id,
@@ -31,7 +31,7 @@ async def get_user_id_from_token(token: str | None, return_user_id: bool = True)
             return None
 
         decoded_jwt = jwt.decode(token, SECRET, algorithms=["HS256"])
-        if datetime.utcnow() >= datetime.fromisoformat(decoded_jwt["expire"]):
+        if datetime.now(timezone.utc) >= datetime.fromisoformat(decoded_jwt["expire"]):
             return None
 
         users_col = get_collection(decoded_jwt["users_col"])
@@ -60,7 +60,7 @@ async def blacklist_token(token: str | None):
             return None
         col = get_collection(decoded_jwt["blacktoken_col"])
         await col.insert_one({"token": token, "expire": decoded_jwt["expire"]})
-        await col.delete_many({"expire": {"$lt": datetime.utcnow().isoformat()}})
+        await col.delete_many({"expire": {"$lt": datetime.now(timezone.utc).isoformat()}})
         return True
     except Exception:
         return None
