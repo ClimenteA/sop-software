@@ -1,7 +1,7 @@
 # SOP software
 
 A webapp/software for writing SOP's (Standard Operating Procedures) which are documented instructions of organization internal routine tasks. Contact me if you want to deploy this for your organization at 
-[softgata.com](https://softgata.com/). You can host it without any restrictions on any VPS (AWS EC2, Droplets, etc).
+[softgata.com](https://softgata.com/) (250$ I'll deploy it for you). You can host it without any restrictions on any VPS (AWS EC2, Droplets, etc).
 
 
 ## Quickstart
